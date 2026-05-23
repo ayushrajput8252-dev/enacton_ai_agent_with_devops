@@ -22,7 +22,36 @@ terraform/.terraform/
 *.tfstate.*
 
 rag/storage/
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
 
+# Terraform variable files (optional if they contain secrets)
+*.tfvars
+*.tfvars.json
+
+# Terraform override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform plan files
+*.tfplan
+
+# Terraform CLI config
+.terraformrc
+terraform.rc
+
+# Terraform lock file
+.terraform.lock.hcl
+
+# Terraform docs/downloads (based on your repo)
+terraform/doc/
+terraform/downloaded.pdf
 .env
 .env.local
 rag/storage/
