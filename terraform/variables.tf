@@ -3,5 +3,5 @@ variable "bucket_name" {
 }
 
 variable "pdf_file" {
-  type = string
+  default = "./doc/EnactOn.pdf"
 }

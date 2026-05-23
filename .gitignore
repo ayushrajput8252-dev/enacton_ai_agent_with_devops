@@ -5,7 +5,30 @@ __pycache__/
 
 # C extensions
 *.so
+node_modules/
+.next/
 
+terraform/.terraform/
+*.tfstate
+*.tfstate.*
+
+__pycache__/
+*.pyc
+node_modules/
+.next/
+
+terraform/.terraform/
+*.tfstate
+*.tfstate.*
+
+rag/storage/
+
+.env
+.env.local
+rag/storage/
+
+.env
+.env.local
 # Distribution / packaging
 .Python
 build/

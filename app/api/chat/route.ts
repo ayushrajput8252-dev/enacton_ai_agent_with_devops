@@ -1,42 +1,101 @@
+/**
+ * Next.js Chat API Route
+ * Acts as a proxy to the FastAPI backend for chat requests
+ * Supports both streaming and non-streaming responses
+ */
+
 export async function POST(req: Request) {
   try {
     const { message } = await req.json();
 
-    // Simulate streaming response with mock AI assistant
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream({
-      async start(controller) {
-        // Simulate typing delay
-        const responses: string[] = [
-          'That\'s a great question about AI implementation. ',
-          'At EnactOn, we specialize in helping enterprises adopt AI strategically. ',
-          'First, we assess your current infrastructure and business goals. ',
-          'Then we design a customized roadmap that minimizes risk and maximizes ROI. ',
-          'Our team handles everything from data preparation to deployment and monitoring. ',
-          'Would you like to know more about our specific services or get started with a consultation?',
-        ];
+    if (!message || typeof message !== 'string') {
+      return new Response(
+        JSON.stringify({ error: 'Invalid message format' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
 
-        for (const chunk of responses) {
-          // Simulate word-by-word streaming
-          const words = chunk.split(' ');
+    // Get FastAPI URL from environment or use default
+    const fastApiUrl = process.env.FASTAPI_URL || 'http://localhost:8000';
+    
+    // Try streaming endpoint first, fallback to non-streaming
+    try {
+      const streamResponse = await fetch(`${fastApiUrl}/api/chat/stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: message,
+          session_id: `web-${Date.now()}`,
+        }),
+      });
+
+      if (!streamResponse.ok) {
+        throw new Error(`FastAPI error: ${streamResponse.status}`);
+      }
+
+      // Return the streaming response directly
+      return new Response(streamResponse.body, {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Transfer-Encoding': 'chunked',
+          'Cache-Control': 'no-cache',
+        },
+      });
+    } catch (streamError) {
+      console.warn('Streaming endpoint failed, trying non-streaming:', streamError);
+
+      // Fallback to non-streaming endpoint
+      const response = await fetch(`${fastApiUrl}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: message,
+          session_id: `web-${Date.now()}`,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`FastAPI error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Simulate streaming response by splitting words
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          const words = data.response.split(' ');
           for (const word of words) {
             controller.enqueue(encoder.encode(word + ' '));
-            await new Promise((resolve) => setTimeout(resolve, 30));
+            await new Promise((resolve) => setTimeout(resolve, 10));
           }
-        }
+          controller.close();
+        },
+      });
 
-        controller.close();
-      },
-    });
-
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Transfer-Encoding': 'chunked',
-      },
-    });
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Transfer-Encoding': 'chunked',
+        },
+      });
+    }
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Failed to process message' }), {
+    console.error('Chat API Error:', error);
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
+    return new Response(JSON.stringify({ 
+      error: 'Failed to process message',
+      details: errorMessage 
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
