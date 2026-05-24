@@ -41,17 +41,20 @@ override.tf.json
 
 # Terraform plan files
 *.tfplan
-
+terraform/downloaded.pdf
 # Terraform CLI config
 .terraformrc
+DEPLOYMENT_READY.md
+README_OPTIMIZATION.md
 terraform.rc
-
+OPTIMIZATION_REPORT.md
+OPTIMIZATION_QUICK_REF.md
 # Terraform lock file
 .terraform.lock.hcl
 
 # Terraform docs/downloads (based on your repo)
 terraform/doc/
-terraform/downloaded.pdf
+terraform/downloaded.pdfc
 .env
 .env.local
 rag/storage/
