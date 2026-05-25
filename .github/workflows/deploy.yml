@@ -21,11 +21,11 @@ jobs:
 
       - name: Build Backend
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/enacton-backend:latest ./backend
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/enacton-backend:latest -f Dockerfile.backend .
 
       - name: Build Frontend
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/enacton-frontend:latest ./frontend
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/enacton-frontend:latest -f Dockerfile.frontend .
 
       - name: Push Backend
         run: |
